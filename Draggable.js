@@ -25,6 +25,9 @@ export default class Draggable extends Component {
 		imageSource:PropTypes.number,
 		offsetX:PropTypes.number,
 		offsetY:PropTypes.number,
+		customWidth:PropTypes.number,
+		customHeight:PropTypes.number,
+		customBg:PropTypes.string,
 		renderColor:PropTypes.string,
 		reverse:PropTypes.bool,
 		pressDrag:PropTypes.func,
@@ -44,7 +47,10 @@ export default class Draggable extends Component {
 		renderText : '＋',
 		renderSize : 36,
 		offsetY : 100,
-		reverse : true
+		reverse : true,
+		customWidth: null,
+		customHeight: 30,
+		customBg: 'transparent'
 	}
 
 	componentWillMount() {
@@ -88,10 +94,10 @@ export default class Draggable extends Component {
 	
 	_positionCss = () => {
 		let Window = Dimensions.get('window');
-		const { renderSize, offsetX, offsetY, x, y, z } = this.props;
+		const { renderSize, offsetX, offsetY, x, y, z, renderShape } = this.props;
 		return {
 			zIndex: z != null ? z : 999,
-			position: 'absolute',
+			position: (renderShape == 'custom') ? 'relative' : 'absolute',
 			top: y != null ? y : (Window.height / 2 - renderSize + offsetY),
 			left: x !=null ? x : (Window.width / 2 - renderSize + offsetX)
 
@@ -99,7 +105,7 @@ export default class Draggable extends Component {
 	}
 
 	_dragItemCss = () => {
-		const { renderShape, renderSize, renderColor } = this.props;
+		const { renderShape, renderSize, renderColor, customWidth, customHeight, customBg } = this.props;
 		if(renderShape == 'circle') {
 			return{
 				backgroundColor: renderColor,
@@ -119,16 +125,23 @@ export default class Draggable extends Component {
 				width: renderSize,
 				height: renderSize 
 			};
+		}else if(renderShape == 'custom') {
+			return {
+				width: 100,
+				height: null,
+				backgroundColor: customBg
+			};
 		}
 	}
 	_dragItemTextCss = () => {
-		const { renderSize } = this.props;
+		const { renderSize, renderShape } = this.props;
 		return {
-			marginTop: renderSize-10,
 			marginLeft: 5,
 			marginRight: 5,
 			textAlign: 'center',
-			color: '#fff'
+			color: '#fff',
+			padding: 0,
+			paddingVertical: 5
 		};
 	}
 	_getTextOrImage = () => {
@@ -150,7 +163,7 @@ export default class Draggable extends Component {
 
 	render() {
 		const touchableContent = this._getTextOrImage();
-		const { pressDrag, longPressDrag, pressInDrag, pressOutDrag } = this.props;
+		const { pressDrag, longPressDrag, pressInDrag, pressOutDrag, renderShape } = this.props;
 
 		return (
 			<View style={this._positionCss()}>
@@ -165,6 +178,23 @@ export default class Draggable extends Component {
 						onPressOut={pressOutDrag}
 					>
 						{touchableContent}	
+						{
+							(renderShape == 'custom') &&
+							<View
+								style={{
+									position: 'absolute',
+									alignSelf: 'center',
+									top: -12,
+									borderStyle: 'solid',
+									borderLeftWidth: 8,
+									borderRightWidth: 8,
+									borderBottomWidth: 12,
+									borderLeftColor: 'transparent',
+									borderRightColor: 'transparent',
+									borderBottomColor: 'rgba(0, 0, 0, 0.7)'
+								}}
+							/>
+						}
 					</TouchableOpacity>
 				</Animated.View>
 			</View>
